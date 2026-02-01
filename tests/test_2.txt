@@ -1,0 +1,7 @@
+name = test_2
+N = 5000
+t_end = 0.15
+cfl = 0.5
+dt_out = 0.005
+left = 1.0 -2.0 0.4
+right = 1.0 2.0 0.4
