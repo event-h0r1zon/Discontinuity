@@ -62,3 +62,20 @@ python3 post_process.py --data-dir data/test_1 --out-dir data/test_1 --stride 4 
 
 ## Tests
 There are three predefined test cases in tests/ that correspond to the Riemann problems described in *Riemann Solvers and Numerical Methods for Fluid Dynamics* by Eleuterio F. Toro, Chapter 4.
+
+### Test file format
+Each test is a plain-text file in tests/ (e.g., [tests/test_2.txt](tests/test_2.txt)) with key-value pairs, one per line:
+
+- `name`: Output subfolder name under data/
+- `solver`: Riemann solver type to use (see below)
+- `N`: Number of cells
+- `t_end`: Final simulation time
+- `cfl`: CFL number
+- `dt_out`: Output interval
+- `left`: Left state as `rho u p`
+- `right`: Right state as `rho u p`
+
+### Solver types
+Two solver types are available:
+- `exact`
+- `hllc`
