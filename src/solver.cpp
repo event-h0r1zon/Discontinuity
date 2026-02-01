@@ -156,3 +156,81 @@ Conserved riemann_solver(const State& left, const State& right) {
 
     return calculate_flux(interface_state);
 }
+
+Conserved hlle_flux(const State& left, const State& right) {
+    Conserved U_L = state_to_conserved(left);
+    Conserved U_R = state_to_conserved(right);
+    Conserved flux_L = calculate_flux(left);
+    Conserved flux_R = calculate_flux(right);
+
+    double gamma = 1.4;
+
+    double a_L = std::sqrt(gamma * left.p / left.rho);
+    double a_R = std::sqrt(gamma * right.p / right.rho);
+
+    double S_L = std::min(left.u - a_L, right.u - a_R);
+    double S_R = std::max(left.u + a_L, right.u + a_R);
+    
+    if (std::abs(S_R - S_L) < 1e-12) return 0.5 * (flux_L + flux_R);
+
+    Conserved flux_star = (S_R * flux_L - S_L * flux_R + S_L * S_R * (U_R - U_L)) / (S_R - S_L);
+
+    if (0 <= S_L) return flux_L;
+    else if (S_L <= 0 && 0 <= S_R) return flux_star;
+    else return flux_R;
+}
+
+Conserved hllc_solver(const State& left, const State& right) {
+    Conserved U_L = state_to_conserved(left);
+    Conserved U_R = state_to_conserved(right);
+    Conserved flux_L = calculate_flux(left);
+    Conserved flux_R = calculate_flux(right);
+
+    double gamma = 1.4;
+    double eps = 1e-12;
+
+    double a_L = std::sqrt(gamma * left.p / left.rho);
+    double a_R = std::sqrt(gamma * right.p / right.rho);
+
+    double S_L = std::min(left.u - a_L, right.u - a_R);
+    double S_R = std::max(left.u + a_L, right.u + a_R);
+
+    double A_L = left.rho * (S_L - left.u);
+    double A_R = right.rho * (S_R - right.u);
+
+    double denom_S_star = (A_L - A_R);
+
+    if (std::abs(denom_S_star) < eps) return hlle_flux(left, right);
+
+    double S_star = (right.p - left.p + A_L * left.u - A_R * right.u) / denom_S_star;
+    
+    double denom_L = (S_L - S_star);
+    double denom_R = (S_R - S_star);
+
+    if (std::abs(denom_L) < eps || std::abs(denom_R) < eps) return hlle_flux(left, right);
+
+    double p_star_L = left.p + left.rho * (S_L - left.u) * (S_star - left.u);
+    double p_star_R = right.p + right.rho * (S_R - right.u) * (S_star - right.u);
+
+    double p_star = 0.5 * (p_star_L + p_star_R);
+
+    double rho_star_L = left.rho * (S_L - left.u) / (S_L - S_star);
+    double rho_star_R = right.rho * (S_R - right.u) / (S_R - S_star);
+
+    double momentum_star_L = rho_star_L * S_star;
+    double momentum_star_R = rho_star_R * S_star;
+
+    double energy_star_L = ((S_L - left.u) * U_L.energy - left.p * left.u + p_star * S_star) / denom_L;
+    double energy_star_R = ((S_R - right.u) * U_R.energy - right.p * right.u + p_star * S_star) / denom_R;
+
+    Conserved U_star_L = {rho_star_L, momentum_star_L, energy_star_L};
+    Conserved U_star_R = {rho_star_R, momentum_star_R, energy_star_R};
+
+    Conserved flux_star_L = flux_L + S_L * (U_star_L - U_L);
+    Conserved flux_star_R = flux_R + S_R * (U_star_R - U_R);
+
+    if (0 <= S_L) return flux_L;
+    else if (S_L <= 0 && 0 <= S_star) return flux_star_L;
+    else if (S_star <= 0 && 0 <= S_R) return flux_star_R;
+    else return flux_R;
+}

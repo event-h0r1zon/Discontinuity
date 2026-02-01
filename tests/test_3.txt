@@ -1,4 +1,5 @@
 name = test_3
+solver = hllc
 N = 5000
 t_end = 0.012
 cfl = 0.5

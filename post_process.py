@@ -18,6 +18,7 @@ class Snapshot:
     rho: np.ndarray
     u: np.ndarray
     p: np.ndarray
+    e: np.ndarray
 
 
 def read_snapshot_time(csv_path: str) -> float:
@@ -33,7 +34,7 @@ def load_snapshot(csv_path: str) -> Snapshot:
     t = read_snapshot_time(csv_path)
     # CSV layout:
     # line 1: t,<value>
-    # line 2: i,x,rho,u,p
+    # line 2: i,x,rho,u,p,E
     data = np.loadtxt(csv_path, delimiter=",", skiprows=2)
     if data.ndim == 1:
         data = data[None, :]  # handle single-row edge case
@@ -42,7 +43,8 @@ def load_snapshot(csv_path: str) -> Snapshot:
     rho = data[:, 2]
     u = data[:, 3]
     p = data[:, 4]
-    return Snapshot(t=t, x=x, rho=rho, u=u, p=p)
+    e = data[:, 5]
+    return Snapshot(t=t, x=x, rho=rho, u=u, p=p, e=e)
 
 
 def discover_snapshots(data_dir: str, pattern: str) -> List[Tuple[float, str]]:
@@ -60,15 +62,17 @@ def ensure_dir(path: str) -> None:
 
 
 def save_static_plot(snap: Snapshot, out_path: str) -> None:
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
+    fig, axes = plt.subplots(4, 1, sharex=True, figsize=(8, 10))
     axes[0].plot(snap.x, snap.rho, lw=2)
     axes[1].plot(snap.x, snap.u, lw=2)
     axes[2].plot(snap.x, snap.p, lw=2)
+    axes[3].plot(snap.x, snap.e, lw=2)
 
     axes[0].set_ylabel("rho")
     axes[1].set_ylabel("u")
     axes[2].set_ylabel("p")
-    axes[2].set_xlabel("x")
+    axes[3].set_ylabel("e")
+    axes[3].set_xlabel("x")
 
     fig.suptitle(f"State at t ≈ {snap.t:.6f}")
     fig.tight_layout()
@@ -83,23 +87,27 @@ def save_animation(
 ) -> None:
     x = snaps[0].x
 
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
+    fig, axes = plt.subplots(4, 1, sharex=True, figsize=(8, 10))
     (line_rho,) = axes[0].plot(x, snaps[0].rho, lw=2)
     (line_u,) = axes[1].plot(x, snaps[0].u, lw=2)
     (line_p,) = axes[2].plot(x, snaps[0].p, lw=2)
+    (line_e,) = axes[3].plot(x, snaps[0].e, lw=2)
 
     axes[0].set_ylabel("rho")
     axes[1].set_ylabel("u")
     axes[2].set_ylabel("p")
-    axes[2].set_xlabel("x")
+    axes[3].set_ylabel("e")
+    axes[3].set_xlabel("x")
 
     # Set y-limits from all frames for stable axes
     rho_all = np.concatenate([s.rho for s in snaps])
     u_all = np.concatenate([s.u for s in snaps])
     p_all = np.concatenate([s.p for s in snaps])
+    e_all = np.concatenate([s.e for s in snaps])
     axes[0].set_ylim(rho_all.min() * 0.98, rho_all.max() * 1.02)
     axes[1].set_ylim(u_all.min() * 0.98, u_all.max() * 1.02)
     axes[2].set_ylim(p_all.min() * 0.98, p_all.max() * 1.02)
+    axes[3].set_ylim(e_all.min() * 0.98, e_all.max() * 1.02)
 
     title = fig.suptitle(f"t = {snaps[0].t:.6f}")
 
@@ -108,8 +116,9 @@ def save_animation(
         line_rho.set_ydata(s.rho)
         line_u.set_ydata(s.u)
         line_p.set_ydata(s.p)
+        line_e.set_ydata(s.e)
         title.set_text(f"t = {s.t:.6f}")
-        return (line_rho, line_u, line_p, title)
+        return (line_rho, line_u, line_p, line_e, title)
 
     anim = FuncAnimation(fig, update, frames=len(snaps), interval=1000 / fps, blit=False)
     fig.tight_layout()

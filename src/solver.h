@@ -8,3 +8,4 @@ struct PressureFunctionResult {
 };
 
 Conserved riemann_solver(const State& left, const State& right);
+Conserved hllc_solver(const State& left, const State& right);

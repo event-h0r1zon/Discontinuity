@@ -1,5 +1,6 @@
 name = test_2
-N = 5000
+solver = hllc
+N = 100000
 t_end = 0.15
 cfl = 0.5
 dt_out = 0.005

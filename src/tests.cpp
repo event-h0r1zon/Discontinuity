@@ -8,6 +8,7 @@
 
 struct TestCase {
     std::string name;
+    std::string solver;
     int N = 100;
     double t_end = 0.25;
     double cfl = 0.5;
@@ -41,6 +42,7 @@ static TestCase parse_test_file(const std::filesystem::path& path) {
 
         std::istringstream iss(val);
         if (key == "name") tc.name = val;
+        else if (key == "solver") iss >> tc.solver;
         else if (key == "N") iss >> tc.N;
         else if (key == "t_end") iss >> tc.t_end;
         else if (key == "cfl") iss >> tc.cfl;
@@ -69,7 +71,7 @@ static void run_test(const TestCase& tc, const std::filesystem::path& out_base_d
     double next_out_t = tc.dt_out;
 
     while (t < tc.t_end) {
-        auto fluxes = calculate_fluxes(mesh);
+        auto fluxes = calculate_fluxes(mesh, tc.solver);
         double dt = compute_time_step(mesh, tc.cfl, dx);
         if (t + dt > tc.t_end) dt = tc.t_end - t;
 

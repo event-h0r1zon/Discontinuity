@@ -51,7 +51,7 @@ State conserved_to_state(const Conserved& conserved) {
     return state;
 }
 
-std::vector<Conserved> calculate_fluxes(const std::vector<State>& mesh) {
+std::vector<Conserved> calculate_fluxes(const std::vector<State>& mesh, const std::string& solver_type) {
     int N = mesh.size();
     
     std::vector<Conserved> fluxes(N - 1);
@@ -60,7 +60,9 @@ std::vector<Conserved> calculate_fluxes(const std::vector<State>& mesh) {
         State left = mesh[i];
         State right = mesh[i + 1];
 
-        fluxes[i] = riemann_solver(left, right);
+        if (solver_type == "hllc") fluxes[i] = hllc_solver(left, right);
+        else if (solver_type == "exact") fluxes[i] = riemann_solver(left, right);
+        else throw std::invalid_argument("Unknown solver type: " + solver_type);
     }
 
     return fluxes;
@@ -128,10 +130,10 @@ void write_snapshot_csv(const std::vector<State>& mesh, double dx, double t, con
 
     out << std::setprecision(17);
     out << "t," << t << "\n";
-    out << "i,x,rho,u,p\n";
+    out << "i,x,rho,u,p,e\n";
 
     for (std::size_t i = 0; i < mesh.size(); ++i) {
         const double x = (static_cast<double>(i) + 0.5) * dx; // cell center
-        out << i << "," << x << "," << mesh[i].rho << "," << mesh[i].u << "," << mesh[i].p << "\n";
+        out << i << "," << x << "," << mesh[i].rho << "," << mesh[i].u << "," << mesh[i].p << "," << mesh[i].getInternalEnergy() << "\n";
     }
 }
