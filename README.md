@@ -36,6 +36,8 @@ This will iterate through all test files in tests/ and write step_*.csv snapshot
 ## Post-processing utilities (Python)
 The script [post_process.py](post_process.py) turns the CSV snapshots into plots and animations.
 
+Disclaimer: Generating .mp4 animations requires ffmpeg to be installed and available on your PATH. See the official installation guides for your OS at https://ffmpeg.org/download.html.
+
 ### Common usages
 - Generate a static plot at a target time (closest snapshot chosen automatically) and an animation:
 
