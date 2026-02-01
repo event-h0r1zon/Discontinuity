@@ -63,11 +63,11 @@ python3 post_process.py --data-dir data/test_1 --out-dir data/test_1 --stride 4 
 ## Tests
 There are three predefined test cases in tests/ that correspond to the Riemann problems described in *Riemann Solvers and Numerical Methods for Fluid Dynamics* by Eleuterio F. Toro, Chapter 4.
 
-Qualitative comparison of the analytical solution against the numerical one for Test 1 against Fig. 4.7 “Test 1: Exact solution for density, velocity, pressure, and specific internal energy at time t = 0.25” from Toro’s *Riemann Solvers for Fluid Dynamics*:
+Qualitative comparison of the analytical solution against the numerical one (using the HLLC approximate solver) for Test 1 against Fig. 4.7 “Test 1: Exact solution for density, velocity, pressure, and specific internal energy at time t = 0.25” from Toro’s *Riemann Solvers for Fluid Dynamics*:
 
 ![Test 1 Comparison - Error Loading](https://i.imgur.com/yS4XTAc.png)
 
-Qualitative comparison of the analytical solution against the numerical one for Test 3 against Fig. 4.9 “Test 3: Exact solution for density, velocity, pressure, and specific internal energy at time t = 0.012” from Toro’s *Riemann Solvers for Fluid Dynamics*:
+Qualitative comparison of the analytical solution against the numerical one (using the HLLC approximate solver) for Test 3 against Fig. 4.9 “Test 3: Exact solution for density, velocity, pressure, and specific internal energy at time t = 0.012” from Toro’s *Riemann Solvers for Fluid Dynamics*:
 
 ![Test 3 Comparison - Error Loading](https://i.imgur.com/jh07ayi.png)
 
